@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>India Unemployment Analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ece7ff 0%, #f8edff 45%, #fcf6fa 100%);
+      color: #232044;
+      font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    }
+    .hero {
+      background: linear-gradient(100deg, #eef3fb 40%, #ffd0ee 100%);
+      border-radius: 22px;
+      box-shadow: 0 10px 28px #d1cdc6a0, 0 1px 1px #fff;
+      min-height: 300px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 32px 0 10px;
+      margin-top: 24px;
+      animation: fadein 1.1s;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(36px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .hero-img img { max-width: 94%; border-radius: 14px; box-shadow: 0 5px 22px #ae69af61,0 1px 1px #fff;}
+    .hero-text { padding: 0 32px; }
+    .hero-text h1 {
+      font-size: 2.0rem;
+      font-weight: 700;
+      color: #962db3;
+      text-shadow: 0 1px 1px #fff;
+      margin-bottom: 12px;
+    }
+    .btn-dashboard {
+      background: linear-gradient(90deg, #cd5bb4 25%, #966be3 95%);
+      color: #fff;
+      border: none;
+      font-size: 1.1rem;
+      padding: 12px 36px;
+      margin: 20px 0 8px;
+      border-radius: 999px;
+      box-shadow: 0 4px 24px #cd5bb473;
+      font-weight: 600;
+      transition: background 0.18s;
+    }
+    .btn-dashboard:hover {
+      background: linear-gradient(90deg, #966be3 25%, #cd5bb4 95%);
+      color: #fff;
+    }
+    .section-title {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      color: #9253ae;
+      font-size: 1.28rem;
+      margin-top: 22px;
+      letter-spacing: .16px;
+    }
+    .divider {
+      border-top: 2.5px solid #cd5bb4;
+      width: 38px;
+      margin: 10px 0 20px 0;
+    }
+    .info-section {
+      background: linear-gradient(120deg, #fffafd 65%, #f5e7fb 100%);
+      border-radius: 14px;
+      box-shadow: 0 6px 18px #ae69af23, 0 1px 1px #fff;
+      padding: 18px 22px 9px;
+      margin-top: 32px;
+      animation: fadein 1.7s;
+      border: 1px solid #f0ddf0;
+      font-size: 0.97rem;
+      transition: box-shadow 0.2s;
+    }
+    .info-section:hover {
+      box-shadow: 0 12px 28px #cd5bb473;
+      border-color: #cd5bb4;
+    }
+    .info-section ul{ padding-left:22px; }
+    .info-section li{ margin-bottom:6px;}
+    .embed-responsive { margin-bottom: 23px; border-radius:16px; box-shadow: 0 6px 22px #cd5bb431;}
+    a {color: #cd5bb4; font-weight:600;}
+    a:hover {color: #9253ae; text-decoration: underline;}
+    /* Chart Section */
+    .chart-section {
+      margin-top: 36px;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+    .chart-card {
+      background: #fff5fa;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px #cd5bb422;
+      padding: 18px 24px 1px;
+      max-width: 500px;
+      margin: 0 auto 22px;
+      border: 1px solid #ead1f3;
+    }
+    .chart-title {
+      font-size: 1.07rem;
+      font-weight: 700;
+      color: #9326b1;
+      margin-bottom: 7px;
+    }
+    /* Responsive tweaks */
+    @media (max-width:700px) {
+      .hero { flex-direction: column; padding:0 7px; }
+      .hero-img img { max-width: 100%;}
+      .hero-text { padding: 0 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HERO SECTION -->
+    <div class="hero row shadow">
+      <div class="hero-img col-md-5 text-center mb-3">
+        <img src="https://img.freepik.com/free-vector/unemployed-concept-illustration_114360-5570.jpg" alt="Unemployment illustration" class="img-fluid" />
+      </div>
+      <div class="hero-text col-md-7">
+        <h1 class="section-title">India Unemployment Analysis Dashboard</h1>
+        <div class="divider"></div>
+        <p style="font-size:0.99rem;">
+          Explore India's unemployment trends by state, seasonality and the impact of Covid-19—experience rich, interactive analytics.
+        </p>
+        <button onclick="window.location.href='YOUR_RENDER_DEPLOYMENT_LINK_HERE'" class="btn-dashboard shadow">View Dashboard</button>
+        <div class="embed-responsive embed-responsive-16by9" style="margin-top: 20px;">
+          <iframe src="https://prezi.com/p/embed/sUN3BNPBOLYmzxlKSigu/" 
+                  id="iframe_container" frameborder="0" 
+                  webkitallowfullscreen mozallowfullscreen 
+                  allowfullscreen allow="autoplay; fullscreen" 
+                  height="315" width="560" style="width:100%; height:315px;">
+          </iframe>      
+      </div>
+    </div>
+
+    <!-- Demo CHART Section -->
+    <div class="chart-section">
+      <div class="chart-card">
+        <div class="chart-title">Sample: Unemployment Rate Spike During Covid-19</div>
+        <canvas id="covidChart" width="420" height="180" style="max-width:100%;"></canvas>
+      </div>
+    </div>
+
+    <!-- INFO SECTION: Unemployment Intro -->
+    <div class="info-section">
+      <h2 class="section-title">What is Unemployment?</h2>
+      <div class="divider"></div>
+      <p>
+        Unemployment is the share of labor force actively seeking but unable to find work. It reflects economic health and social progress, impacting families, communities, and national development.
+      </p>
+      <p>
+        Understanding the different types of unemployment
+        To grasp the complexities of unemployment, it's essential to recognize its various forms. These include: 
+        </li>Frictional Unemployment: This is the natural, temporary unemployment experienced by individuals in between jobs, actively searching or transitioning to a new one. Think of a college graduate looking for their first job or someone who has quit their previous role and is now seeking a new opportunity.<li>
+        </li>Structural Unemployment: This arises from a mismatch between the skills of the available workforce and the skills demanded by employers, or when workers are unable to reach available jobs due to geographic limitations. Technological advancements and automation, for example, can render existing skills obsolete, leading to structural unemployment.<li>
+        </li>Cyclical Unemployment: This type of unemployment is directly linked to the ups and downs of the economy. During economic downturns or recessions, companies may lay off workers due to reduced demand for goods and services. As the economy recovers, cyclical unemployment tends to decrease.<li>
+        </li>Seasonal Unemployment: As the name suggests, this refers to unemployment tied to specific seasons of the year, where certain industries experience fluctuations in demand for labor. For example, agricultural workers may face seasonal unemployment during off-seasons.<li>
+        </li>Disguised Unemployment: This occurs when more people are employed than are truly necessary for a particular task or industry, particularly in sectors like agriculture in developing countries. The marginal productivity of these extra workers is effectively zero.<li>
+        </li>Technological Unemployment: This is a specific type of structural unemployment caused by the adoption of advanced technologies like AI, automation, and robotics, which displace human workers in tasks previously performed manually.<li>
+        </li>Vulnerable Unemployment: This describes employment characterized by low wages, job insecurity, and lack of social protection, often found in the informal sector, making workers susceptible to economic shocks and exploitation. <li>
+      </p>
+    </div>
+
+    <!-- INFO SECTION: India & Covid Impact -->
+    <div class="info-section">
+      <h2 class="section-title">Unemployment in India & Impact of Covid-19</h2>
+      <div class="divider"></div>
+      <ul>
+        <li>Unemployment rate peaked at <b>24.3%</b> in April 2020 due to lockdowns; urban rates exceeded 30%, rural areas suffered too.</li>
+        <li>Youth, women, and informal workers were hit hardest, with insecure jobs and reduced opportunities.</li>
+        <li>Many switched to self-employment or casual work, labor force participation dropped sharply, and recovery is ongoing.</li>
+      </ul>
+    </div>
+
+    <!-- INFO SECTION: About the Data -->
+    <div class="info-section">
+      <h2 class="section-title">About the Data</h2>
+      <div class="divider"></div>
+      <p>
+        The dashboard merges two comprehensive government datasets from Kaggle:
+        <ul>
+          <li>
+            <a href="https://www.kaggle.com/datasets/gokulrajkmv/unemployment-in-india?select=Unemployment_Rate_upto_11_2020.csv" target="_blank">
+              Unemployment_Rate_upto_11_2020.csv
+            </a> — Monthly state unemployment rates up to November 2020.
+          </li>
+          <li>
+            <a href="https://www.kaggle.com/datasets/gokulrajkmv/unemployment-in-india?select=Unemployment+in+India.csv" target="_blank">
+              Unemployment_in_India.csv
+            </a> — Labor metrics by region and time.
+          </li>
+        </ul>
+        Datasets were cleaned and merged by region, month, and metric (unemployment, employment, labor participation). Feature engineering included harmonizing date formats and mapping zones for detailed, interactive analysis.
+      </p>
+    </div>
+
+    <!-- INFO SECTION: Further Facts -->
+    <div class="info-section">
+      <h2 class="section-title">Key Facts & Further Reading</h2>
+      <div class="divider"></div>
+      <ul>
+        <li>India’s labor market is predominantly informal, with significant challenges for youth and rural workers.</li>
+        <li>Covid-19 induced mass layoffs, but also spurred innovation—including job guarantee schemes and aid.</li>
+        <li>Reliable tracking of unemployment remains a challenge due to informality and migration.</li>
+      </ul>
+      <p>
+        <a href="https://openknowledge.worldbank.org/server/api/core/bitstreams/ae436725-6945-4dd7-9b5b-3795d84348fd/content" target="_blank">
+          Synthesis of the Impacts of Covid-19 on India's Labor Market (World Bank)
+        </a>
+      </p>
+    </div>
+  </div>
+  <!-- Chart.js demo chart -->
+  <script>
+    const ctx = document.getElementById('covidChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan 2020','Feb 2020','Mar 2020','Apr 2020','May','Jun','Jul','Aug','Sep','Oct','Nov'],
+        datasets: [{
+          label: 'India Unemployment Rate (%)',
+          data: [7.5, 7.3, 7.8, 24.3, 21.7, 15.8, 7.9, 8.4, 6.7, 7.0, 6.5],
+          fill: false,
+          borderColor: '#cd5bb4',
+          backgroundColor: '#f5e7fb',
+          tension: 0.25,
+          pointRadius: 3,
+          pointBorderColor: '#9253ae',
+          pointBackgroundColor: '#fff'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {beginAtZero:true, grid:{color:'#eed9fa'}, ticks:{color:'#9253ae',font:{size:12}}},
+          x: { grid:{color:'#f5e7fb'}, ticks:{color:'#9253ae',font:{size:11}} }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
