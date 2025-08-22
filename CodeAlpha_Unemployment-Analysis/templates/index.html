@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>India Unemployment Analysis Dashboard</title>
+
+<!-- Bootstrap + Plotly + jsPDF + html2canvas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+<script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+  :root{
+    --bg:#013504; --panel:#4f7753f9; --sidebar:#4f7753f9; --accent:#cd5bb4; --text:#f1c4f2;
+  }
+  html,body{height:100%}
+  body{background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Open Sans",sans-serif}
+  h1,h2,h3,h4{color:var(--accent); font-weight:700}
+  .sidebar{background:var(--sidebar); padding:18px; border-radius:12px; height:100vh; overflow:auto}
+  .card{background:var(--panel); border:none; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.35); margin-bottom:20px}
+  .btn-primary{background:var(--accent); border:none}
+  .btn-outline-light{border-color:#570753;color:#ecc1eb}
+  .btn-outline-light:hover{background:#623365;border-color:#a762a6}
+  select.form-control, .custom-select{background:#975a97; color:#efb2f4; border:1px solid #e296e2}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #555; border-radius:999px; font-size:.8rem; margin:2px 6px 0 0}
+  .toolbar button{margin:0 4px 8px 0}
+  .kpi{display:flex; gap:14px; flex-wrap:wrap}
+  .kpi .box{background:#e789e7; border-radius:12px; padding:12px 14px; min-width:160px}
+  .kpi .box h4{margin:0; font-size:1.1rem; color:#bb75c2}
+  .kpi .box p{margin:4px 0 0; font-weight:700; font-size:1.2rem}
+  .legend-note{font-size:.85rem; opacity:.85}
+  .sticky-top{top:12px}
+</style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-md-3 sticky-top sidebar">
+      <h3 class="mb-3">Filters</h3>
+
+      <div class="form-group">
+        <label for="dataset">Dataset</label>
+        <select id="dataset" class="form-control">
+          <option value="States">States (X)</option>
+          <option value="Zones">Zones (Y)</option>
+          <option value="Both">Both</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="regions">States / Zones</label>
+        <select id="regions" class="form-control" multiple size="10"></select>
+        <small class="form-text text-light-50">hold Ctrl/Cmd to multi-select</small>
+      </div>
+
+      <div class="form-group">
+        <label for="metrics">Metrics</label>
+        <select id="metrics" class="form-control" multiple>
+          <!-- populated in JS -->
+        </select>
+        <small class="form-text text-light-50">choose one or more metrics</small>
+      </div>
+
+      <div class="mb-2">
+        <span class="pill">COVID marker: <span style="color:#551975">Mar 2020</span></span>
+      </div>
+
+      <div class="toolbar my-2">
+        <button class="btn btn-primary btn-block" id="applyBtn">Apply Filters</button>
+        <button class="btn btn-outline-light btn-block" id="resetBtn">Reset</button>
+      </div>
+
+      <hr class="border-light">
+
+      <h5 class="mb-2">Downloads</h5>
+      <div class="toolbar">
+        <button class="btn btn-outline-light btn-sm" data-dl="line">PNG Line</button>
+        <button class="btn btn-outline-light btn-sm" data-dl="monthly">PNG Monthly/Quarterly</button>
+        <button class="btn btn-outline-light btn-sm" data-dl="compare">PNG Comparison</button>
+        <button class="btn btn-outline-light btn-sm" data-dl="heatmap">PNG Heatmap</button>
+        <button class="btn btn-outline-light btn-sm" data-dl="corr">PNG Correlation</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn btn-outline-light btn-sm" id="csvBtn">Download CSV (filtered)</button>
+        <button class="btn btn-outline-light btn-sm" id="pdfBtn">Export PDF report</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-md-9 py-3">
+      <div class="card p-3">
+        <h3 class="mb-2">Interactive Line Charts</h3>
+        <p class="legend-note">Shows unemployment trends by selection. Red dashed line marks March 2020 (COVID onset).</p>
+        <div id="lineChart" style="height:420px;"></div>
+      </div>
+
+      <div class="card p-3">
+        <h3 class="mb-2">Monthly / Quarterly Trends</h3>
+        <p class="legend-note">Seasonality patterns and aggregated trends. Use metric selector to change the metric.</p>
+        <div id="monthlyChart" style="height:420px;"></div>
+      </div>
+
+      <div class="card p-3">
+        <h3 class="mb-2">Side-by-Side Comparison</h3>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="compare1">First Region</label>
+            <select id="compare1" class="custom-select"></select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="compare2">Second Region</label>
+            <select id="compare2" class="custom-select"></select>
+          </div>
+        </div>
+        <div id="comparisonChart" style="height:420px;"></div>
+      </div>
+
+      <div class="card p-3">
+        <h3 class="mb-3">Optional Panels</h3>
+
+        <div class="kpi mb-3" id="kpiRow">
+          <!-- pre/during COVID stats populate here -->
+        </div>
+
+        <div class="row">
+          <div class="col-lg-6">
+            <h5 class="mb-2">Heatmap: Monthly Unemployment</h5>
+            <div id="heatmap" style="height:420px;"></div>
+          </div>
+          <div class="col-lg-6">
+            <h5 class="mb-2">Correlation: Unemployment vs Labour Participation</h5>
+            <div id="corrChart" style="height:420px;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const neonColors = ['#c026d3', '#facc15', '#93c5fd', '#22d3ee', '#f87171', '#a3e635', '#f472b6', '#bef264'];
+const COVID_DATE = "2020-03-01";
+
+  const states = {{ states|tojson }};
+  const zones = {{ zones|tojson }};
+
+const $dataset = document.getElementById('dataset');
+const $regions = document.getElementById('regions');
+const $metrics = document.getElementById('metrics');
+const $compare1 = document.getElementById('compare1');
+const $compare2 = document.getElementById('compare2');
+
+
+const COLS = {
+  state: ['__state', 'Region'],
+  zone: ['__zone', 'Zone_x'],
+  dateX: ['__dateX', 'Date_x'],
+  dateY: ['__dateY', 'Date_y'],
+  unemX: ['__unemX', 'Estimated Unemployment Rate (%)_x'],
+  unemY: ['__unemY', 'Estimated Unemployment Rate (%)_y'],
+  lprX: ['__lprX', 'Estimated Labour Participation Rate (%)_x'],
+  lprY: ['__lprY', 'Estimated Labour Participation Rate (%)_y'],
+  empX: ['__empX', 'Estimated Employed_x'],
+  empY: ['__empY', 'Estimated Employed_y'],
+  monthX: ['__monthX', 'Month_x'],
+  monthY: ['__monthY', 'Month_y'],
+  monthNameX: ['__monthNameX', 'MonthName_x'],
+  monthNameY: ['__monthNameY', 'MonthName_y']
+};
+
+
+// Utility functions
+function pick(obj, keys, fallback = null) {
+  for (const k of keys) { if (k in obj) return obj[k]; }
+  return fallback;
+}
+function parseNum(val) {
+  return (val !== null && val !== undefined && !isNaN(Number(val))) ? Number(val) : null;
+}
+function pickKey(obj, keys) {
+  for (const k of keys) { if (k in obj) return k; }
+  return null;
+}
+function toDate(v) { return v ? new Date(v) : null; }
+function fmt(n, d = 2) { return (n === null || n === undefined || Number.isNaN(n)) ? '—' : Number(n).toFixed(d); }
+function uniq(a) { return Array.from(new Set(a)); }
+function groupBy(arr, keyFn) {
+  const m = new Map();
+  arr.forEach(r => {
+    const k = keyFn(r);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(r);
+  });
+  return m;
+}
+function selectedValues(select) {
+  return Array.from(select.selectedOptions).map(o => o.value);
+}
+function setOptions(select, arr, { clear = true } = {}) {
+  if (clear) select.innerHTML = '';
+  arr.forEach(v => select.add(new Option(v, v)));
+}
+
+/* Populate control dropdowns */
+function populateRegions() {
+  const mode = $dataset.value;
+  let items = [];
+  if (mode === 'States') items = states;
+  else if (mode === 'Zones') items = zones;
+  else items = uniq([...(states || []), ...(zones || [])]);
+
+  setOptions($regions, items);
+  setOptions($compare1, items);
+  setOptions($compare2, items);
+
+  if (items.length) {
+    $regions.options[0].selected = true;
+    if (items.length > 1) $regions.options[1].selected = true;
+    $compare1.selectedIndex = 0;
+    $compare2.selectedIndex = Math.min(1, items.length - 1);
+  }
+}
+
+function populateMetrics() {
+  const metricOptions = [
+    { label: 'Unemployment Rate (X)', value: 'unemX' },
+    { label: 'Unemployment Rate (Y)', value: 'unemY' },
+    { label: 'Labour Participation (X)', value: 'lprX' },
+    { label: 'Labour Participation (Y)', value: 'lprY' },
+    { label: 'Employment (X)', value: 'empX' },
+    { label: 'Employment (Y)', value: 'empY' }
+  ];
+  setOptions($metrics, metricOptions.map(m => m.label));
+  window.metricMap = new Map(metricOptions.map(m => [m.label, m.value]));
+  for (const opt of $metrics.options) {
+    if (opt.text.includes('Unemployment')) opt.selected = true;
+  }
+}
+
+/* Fetch data from backend */
+async function fetchData() {
+  const mode = $dataset.value;
+  const selected = selectedValues($regions);
+
+  let statesPayload = [], zonesPayload = [];
+  if (mode === 'States') statesPayload = selected;
+  else if (mode === 'Zones') zonesPayload = selected;
+  else {
+    statesPayload = selected.filter(s => states.includes(s));
+    zonesPayload = selected.filter(z => zones.includes(z));
+  }
+
+  const resp = await fetch('/filter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ states: statesPayload, zones: zonesPayload })
+  });
+  const rows = await resp.json();
+
+  return rows.map(r => {
+    const d = { ...r };
+    const kState = pickKey(d, COLS.state);
+    const kZone = pickKey(d, COLS.zone);
+    const kDX = pickKey(d, COLS.dateX);
+    const kDY = pickKey(d, COLS.dateY);
+
+    d.__state = kState ? d[kState] : null;
+    d.__zone = kZone ? d[kZone] : null;
+
+    d.__dateX = kDX && d[kDX] ? new Date(d[kDX]) : null;
+    d.__dateY = kDY && d[kDY] ? new Date(d[kDY]) : null;
+
+    if (d.__dateX && isNaN(d.__dateX)) console.warn('Invalid __dateX:', d[kDX]);
+    if (d.__dateY && isNaN(d.__dateY)) console.warn('Invalid __dateY:', d[kDY]);
+
+    if (d.__dateX) d.__dateX.setHours(0, 0, 0, 0);
+    if (d.__dateY) d.__dateY.setHours(0, 0, 0, 0);
+
+    d.__unemX = parseNum(pick(d, COLS.unemX));
+    d.__unemY = parseNum(pick(d, COLS.unemY));
+    d.__lprX = parseNum(pick(d, COLS.lprX));
+    d.__lprY = parseNum(pick(d, COLS.lprY));
+    d.__empX = parseNum(pick(d, COLS.empX));
+    d.__empY = parseNum(pick(d, COLS.empY));
+
+    d.__monthX = d.__dateX ? d.__dateX.getMonth() + 1 : (d.__monthY || 1);
+    d.__monthY = d.__dateY ? d.__dateY.getMonth() + 1 : (d.__monthX || 1);
+
+    return d;
+  });
+}
+
+/* Plot helpers */
+function covidShape(ymax) {
+  return [{
+    type: 'line',
+    x0: COVID_DATE, x1: COVID_DATE,
+    y0: 0, y1: ymax || 1,
+    line: { color: '#ff6b6b', dash: 'dash', width: 2 },
+    xref: 'x', yref: 'y'
+  }];
+}
+
+function layoutBase(title, ytitle) {
+  return {
+    title,
+    paper_bgcolor: '#013504',
+    plot_bgcolor: '#1a3b1b',
+    font: { color: '#f1c4f2' },
+    xaxis: { gridcolor: '#4f7753' },
+    yaxis: { gridcolor: '#4f7753' },
+    hovermode: 'x unified',
+    margin: { t: 48, l: 60, r: 20, b: 48 },
+    legend: { orientation: 'h', x: 0, y: 1.12 }
+  };
+}
+
+/* Chart Functions (makeLineChart, makeMonthlyChart, makeComparisonChart, makeHeatmap, makeCorrelation) */
+
+/* Below is an example for makeLineChart with validation - implement others similarly */
+function makeLineChart(data, mode, metrics) {
+  const traces = [];
+  const byRegion = groupBy(data, r => {
+    return mode === 'States' ? (r.__state || r.__zone || 'Unknown')
+      : mode === 'Zones' ? (r.__zone || r.__state || 'Unknown')
+        : (r.__state ? `State: ${r.__state}` : `Zone: ${r.__zone}`);
+  });
+
+  let i = 0;
+  let globalMax = 0;
+
+  for (const [region, rows] of byRegion.entries()) {
+    metrics.forEach(mLab => {
+      const mKey = window.metricMap.get(mLab);
+      if (!mKey) return;
+      const isX = mKey.endsWith('X');
+      const points = rows.map(r => {
+        const xVal = isX ? r.__dateX : r.__dateY;
+        const yVal = r['__' + mKey];
+        if (
+          xVal instanceof Date && !isNaN(xVal.getTime()) &&
+          typeof yVal === 'number' && Number.isFinite(yVal)
+        ) {
+          return { x: xVal, y: yVal };
+        }
+        return null;
+      }).filter(p => p !== null);
+
+      if (points.length === 0) return;
+
+      const x = points.map(p => p.x);
+      const y = points.map(p => p.y);
+
+      const maxY = Math.max(...y);
+      if (Number.isFinite(maxY)) globalMax = Math.max(globalMax, maxY);
+
+      traces.push({
+        x, y,
+        type: 'scatter', mode: 'lines',
+        name: `${region} • ${mLab}`,
+        line: { color: neonColors[i % neonColors.length], width: 2 },
+        marker: { size: 6, color: neonColors[i % neonColors.length] },
+        hovertemplate: '%{x|%b %Y}<br>%{y:.2f}<extra>' + region + ' • ' + mLab + '</extra>'
+      });
+      i++;
+    });
+  }
+
+  const layout = layoutBase('Unemployment Trends', 'Value');
+  layout.shapes = covidShape(globalMax * 1.05 || 1);
+  Plotly.newPlot('lineChart', traces, layout, { responsive: true });
+}
+
+function makeMonthlyChart(data, metricLabel) {
+  const mKey = window.metricMap.get(metricLabel) || 'unemX';
+  const isX = mKey.endsWith('X');
+
+  // Initialize month buckets
+  const byMonth = new Array(12).fill(0).map(() => ({ sum: 0, n: 0 }));
+
+  data.forEach(r => {
+    const m = isX ? r.__monthX : r.__monthY;
+    const v = r['__' + mKey];
+    if (m >= 1 && m <= 12 && Number.isFinite(v)) {
+      byMonth[m - 1].sum += v;
+      byMonth[m - 1].n += 1;
+    }
+  });
+
+  const x = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const y = byMonth.map(o => o.n ? o.sum / o.n : null);
+
+  const trace = {
+    x, y, type: 'bar',
+    marker: { color: '#ff6b6b' },
+    hovertemplate: '%{x}<br>%{y:.2f}<extra></extra>'
+  };
+  const layout = layoutBase('Monthly / Quarterly Trends', metricLabel);
+  Plotly.newPlot('monthlyChart', [trace], layout, { responsive: true });
+}
+function makeHeatmap(data) {
+  const map = new Map(); // region maps to array of 12 month values {sum, n}
+  const regionsSet = new Set();
+
+  data.forEach(r => {
+    const region = r.__state || r.__zone || 'Unknown';
+    regionsSet.add(region);
+  });
+
+  const regionsArr = Array.from(regionsSet);
+  regionsArr.forEach(reg => map.set(reg, new Array(12).fill(null).map(() => ({ sum: 0, n: 0 }))));
+
+  data.forEach(r => {
+    const region = r.__state || r.__zone || 'Unknown';
+    const m = r.__monthX || r.__monthY;
+    const v = Number.isFinite(r.__unemX) ? r.__unemX : r.__unemY;
+    if (m >= 1 && m <= 12 && Number.isFinite(v)) {
+      const cell = map.get(region)[m - 1];
+      cell.sum += v;
+      cell.n += 1;
+    }
+  });
+
+  const z = regionsArr.map(reg => map.get(reg).map(c => c.n ? c.sum / c.n : null));
+  const x = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const trace = {
+    z, x, y: regionsArr, type: 'heatmap',
+    hovertemplate: '%{y} • %{x}<br>%{z:.2f}%<extra></extra>',
+    colorbar: { title: 'Unemployment (%)' }
+  };
+  const layout = layoutBase('Monthly Unemployment Heatmap', '');
+  layout.yaxis = { automargin: true };
+  Plotly.newPlot('heatmap', [trace], layout, { responsive: true });
+}
+function makeCorrelation(data) {
+  // Compute points for scatter: Unemployment vs Labour Participation (prefer X columns)
+  const pts = data.map(r => {
+    const u = Number.isFinite(r.__unemX) ? r.__unemX : r.__unemY;
+    const l = Number.isFinite(r.__lprX) ? r.__lprX : r.__lprY;
+    const region = r.__state || r.__zone || 'Unknown';
+    return { x: l, y: u, name: region };
+  }).filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+
+  const trace = {
+    x: pts.map(p => p.x), y: pts.map(p => p.y),
+    mode: 'markers', type: 'scatter', text: pts.map(p => p.name),
+    hovertemplate: 'LPR: %{x:.2f}%<br>Unemployment: %{y:.2f}%<br>%{text}<extra></extra>'
+  };
+  const layout = layoutBase('Correlation: Unemployment vs Labour Participation', 'Unemployment (%)');
+  layout.xaxis.title = 'Labour Participation (%)';
+  Plotly.newPlot('corrChart', [trace], layout, { responsive: true });
+}
+function makeComparisonChart(data, metricLabel, r1, r2, mode) {
+  const mKey = window.metricMap.get(metricLabel) || 'unemX';
+  const isX = mKey.endsWith('X');
+
+  const rows1 = data.filter(r => 
+    mode === 'States' ? r.__state === r1 
+    : mode === 'Zones' ? r.__zone === r1 
+    : r.__state === r1 || r.__zone === r1);
+
+  const rows2 = data.filter(r => 
+    mode === 'States' ? r.__state === r2 
+    : mode === 'Zones' ? r.__zone === r2 
+    : r.__state === r2 || r.__zone === r2);
+
+  const points1 = rows1.map(r =>{
+    const xVal = isX ? r.__dateX : (r.__dateY || r.__dateX);
+    const yVal = r['__'+mKey];
+    if(xVal instanceof Date && !isNaN(xVal.getTime()) && typeof yVal === 'number' && Number.isFinite(yVal)){
+      return {x:xVal, y:yVal};
+    }
+    return null;
+  }).filter(p => p!==null);
+
+  const points2 = rows2.map(r =>{
+    const xVal = isX ? r.__dateX : (r.__dateY || r.__dateX);
+    const yVal = r['__'+mKey];
+    if(xVal instanceof Date && !isNaN(xVal.getTime()) && typeof yVal === 'number' && Number.isFinite(yVal)){
+      return {x:xVal, y:yVal};
+    }
+    return null;
+  }).filter(p => p!==null);
+
+  // If nothing to plot, clear the chart
+  if(points1.length === 0 && points2.length === 0){
+    Plotly.purge('comparisonChart');
+    return;
+  }
+
+  const trace1 = {
+    x: points1.map(p => p.x),
+    y: points1.map(p => p.y),
+    mode: 'lines',
+    type: 'scatter',
+    name: r1
+  };
+
+  const trace2 = {
+    x: points2.map(p => p.x),
+    y: points2.map(p => p.y),
+    mode: 'lines',
+    type: 'scatter',
+    name: r2
+  };
+
+  const ymax = Math.max(
+    ...(trace1.y.length ? trace1.y.filter(Number.isFinite) : [0]),
+...(trace2.y.length ? trace2.y.filter(Number.isFinite) : [0]),
+1
+);
+  const layout = layoutBase('Side-by-Side Comparison', metricLabel);
+  layout.shapes = covidShape(ymax * 1.05);
+  Plotly.newPlot('comparisonChart', [trace1, trace2].filter(t => t.y.length > 0), layout, {responsive:true});
+}
+
+// Implement the other chart functions similarly with appropriate validation
+
+/* KPI Compute and Render */
+function computeKPI(data) {
+  const cutoff = new Date(COVID_DATE);
+  const pre = [], during = [];
+  data.forEach(r => {
+    const dt = r.__dateX || r.__dateY;
+    const val = Number.isFinite(r.__unemX) ? r.__unemX : r.__unemY;
+    if (!dt || !Number.isFinite(val)) return;
+    (dt < cutoff ? pre : during).push(val);
+  });
+  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  return {
+    pre: avg(pre), during: avg(during), delta: (avg(during) === null || avg(pre) === null) ? null : (avg(during) - avg(pre))
+  };
+}
+
+function renderKPI(k) {
+  const $row = document.getElementById('kpiRow');
+  $row.innerHTML = '';
+  const items = [
+    { title: 'Pre-COVID Avg', val: k.pre },
+    { title: 'During-COVID Avg', val: k.during },
+    { title: 'Change', val: k.delta }
+  ];
+  items.forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'box';
+    div.innerHTML = `<h4>${it.title}</h4><p>${fmt(it.val)}</p>`;
+    $row.appendChild(div);
+  });
+}
+
+/* Downloads: PNG, CSV, PDF (your existing implementation remains unchanged) */
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'px', format: 'a4' });
+  const pages = [
+    { id: 'lineChart', title: 'Interactive Line Charts' },
+    { id: 'monthlyChart', title: 'Monthly / Quarterly Trends' },
+    { id: 'comparisonChart', title: 'Side-by-Side Comparison' },
+    { id: 'heatmap', title: 'Monthly Unemployment Heatmap' },
+    { id: 'corrChart', title: 'Correlation: Unemployment vs Labour Participation' },
+  ];
+
+  for (let i = 0; i < pages.length; i++) {
+    const el = document.getElementById(pages[i].id);
+    await Plotly.Plots.resize(el);
+    const canvas = await html2canvas(el, { backgroundColor: null, scale: 2 });
+    const img = canvas.toDataURL('image/png', 1.0);
+
+    if (i > 0) doc.addPage();
+    doc.setFontSize(14);
+    doc.text(pages[i].title, 20, 24);
+    
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxW = pageWidth - 40;
+    const maxH = pageHeight - 60;
+
+    doc.addImage(img, 'PNG', 20, 32, maxW, Math.min(maxH, (canvas.height / canvas.width) * maxW));
+  }
+  doc.save('unemployment_report.pdf');
+}
+
+
+/* Wiring Up Event Listeners and Initial Load */
+async function apply() {
+  const raw = await fetchData();
+  window.__lastRaw = raw;
+
+  const metricsSelected = selectedValues($metrics);
+  const mode = $dataset.value;
+
+  if ($compare1.options.length && !$compare1.value) $compare1.selectedIndex = 0;
+  if ($compare2.options.length && !$compare2.value) $compare2.selectedIndex = Math.min(1, $compare2.options.length - 1);
+
+  makeLineChart(raw, mode, metricsSelected);
+  makeMonthlyChart(raw, metricsSelected[0] || 'Unemployment Rate (X)');
+  makeComparisonChart(raw, metricsSelected[0] || 'Unemployment Rate (X)', $compare1.value, $compare2.value, mode);
+  makeHeatmap(raw);
+  makeCorrelation(raw);
+  renderKPI(computeKPI(raw));
+}
+
+document.getElementById('applyBtn').addEventListener('click', apply);
+document.getElementById('resetBtn').addEventListener('click', () => {
+  $dataset.value = 'States';
+  populateRegions();
+  populateMetrics();
+  apply();
+});
+
+document.querySelectorAll('[data-dl]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    const id = e.currentTarget.getAttribute('data-dl');
+    const map = { line: 'lineChart', monthly: 'monthlyChart', compare: 'comparisonChart', heatmap: 'heatmap', corr: 'corrChart' };
+    downloadPNG(map[id], `chart_${id}`);
+  });
+});
+
+document.getElementById('csvBtn').addEventListener('click', () => downloadCSV(window.__lastRaw || []));
+document.getElementById('pdfBtn').addEventListener('click', downloadPDF);
+
+$dataset.addEventListener('change', populateRegions);
+
+// Initial population and render
+populateRegions();
+populateMetrics();
+apply();
+
+</script>
+</body>
+</html>
