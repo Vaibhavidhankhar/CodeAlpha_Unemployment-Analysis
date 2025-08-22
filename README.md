@@ -16,7 +16,7 @@
 🔗 **Live Sites & Links:**  
 - GitHub Repository: [CodeAlpha Unemployment Analysis](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)  
 - GitHub Pages (Project Showcase & Info): [Project Site](https://vaibhavidhankhar.github.io/CodeAlpha_Unemployment-Analysis/)  
-- Try the Dashboard: [India Unemployment Analysis Dashboard]([https://the-iris-oracle.onrender.com](https://india-unemployment-analysis-dashboard.onrender.com))
+- Try the Dashboard: [India Unemployment Analysis Dashboard](https://india-unemployment-analysis-dashboard.onrender.com)
 - Colab Notebook with Model (PROJECT_UnemploymentAnalysis.ipynb): [Open in Colab](PROJECT_UnemploymentAnalysis.ipynb)  
 - Alternate Colab Notebook (CodeAlpha_UnemploymentAnalysis.ipynb):[Open in Colab](CodeAlpha_UnemploymentAnalysis.ipynb)
 
@@ -133,6 +133,6 @@ This project is open-source and available under the MIT License.
 - Author: Vaibhavi Dhankhar
 - Email: bhavi7677@gmail.com
 - GitHub: Vaibhavi Dhankhar [CodeAlpha Unemployment Analysis](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)  
-- Project Page: GitHub Pages Site [India Unemployment Analysis Dashboard]([https://the-iris-oracle.onrender.com](https://india-unemployment-analysis-dashboard.onrender.com))
+- Project Page:[India Unemployment Analysis Dashboard](https://india-unemployment-analysis-dashboard.onrender.com)
 
 
