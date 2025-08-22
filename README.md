@@ -13,12 +13,13 @@
 
 ---
 
-## 🔗 Quick Access Buttons
+🔗 **Live Sites & Links:**  
+- GitHub Repository: [CodeAlpha Unemployment Analysis](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)  
+- GitHub Pages (Project Showcase & Info): [Project Site](https://vaibhavidhankhar.github.io/CodeAlpha_Unemployment-Analysis/)  
+- Try the Dashboard: [India Unemployment Analysis Dashboard]([https://the-iris-oracle.onrender.com](https://india-unemployment-analysis-dashboard.onrender.com))
+- Colab Notebook with Model (PROJECT_UnemploymentAnalysis.ipynb): [Open in Colab](PROJECT_UnemploymentAnalysis.ipynb)  
+- Alternate Colab Notebook (CodeAlpha_UnemploymentAnalysis.ipynb):[Open in Colab](CodeAlpha_UnemploymentAnalysis.ipynb)
 
-[![Web App](https://img.shields.io/badge/View%20Web%20App-Render-blue?logo=google-chrome)](https://your-render-link-here)  
-[![Project Repo](https://img.shields.io/badge/View%20Project-GitHub-black?logo=github)](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)  
-[![Colab Notebook](https://img.shields.io/badge/View%20Colab-Notebook-orange?logo=googlecolab)](https://colab.research.google.com/your-colab-link-here)  
-[![Dashboard URL]([https://your-demo-link-here](https://india-unemployment-analysis-dashboard.onrender.com))
 
 ---
 
@@ -126,10 +127,12 @@ Identify seasonal and regional patterns.
 
 ## 📜 License
 This project is open-source and available under the MIT License.
-📫 Contact
-Vaibhavi Dhankhar
-GitHub: [](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)
-Email: bhavi7677@gmail.com
+---
 
+## 📬 Contact & Connect
+- Author: Vaibhavi Dhankhar
+- Email: bhavi7677@gmail.com
+- GitHub: Vaibhavi Dhankhar [CodeAlpha Unemployment Analysis](https://github.com/Vaibhavidhankhar/CodeAlpha_Unemployment-Analysis.git)  
+- Project Page: GitHub Pages Site [India Unemployment Analysis Dashboard]([https://the-iris-oracle.onrender.com](https://india-unemployment-analysis-dashboard.onrender.com))
 
 
