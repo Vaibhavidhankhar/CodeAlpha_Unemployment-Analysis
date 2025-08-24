@@ -36,6 +36,17 @@ This project includes:
 
 ---
 
+## 🎬 Live Demo / GIF
+
+![Demo GIF](walkthrough.gif)  
+
+Click the "India Unemployment Analysis Dashboard" button below on the project page to access the live ML predictor:
+
+[India Unemployment Analysis Dashboard](https://india-unemployment-analysis-dashboard.onrender.com)
+
+
+---
+
 ## 📂 Dataset
 
 The data is sourced from Kaggle:
